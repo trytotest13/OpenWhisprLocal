@@ -188,7 +188,7 @@
     "@tiptap/extension-typography": "3.31.3",
     "@tiptap/pm": "3.31.3",
     "@tiptap/react": "3.31.3",
-    "@tiptap/starter-kit": "3.31.3",
+    "@tiptap/starter-kit": "3.35.0",
     "@tiptap/suggestion": "3.31.3",
     "agent-base": "^7.1.4",
     "ai": "^6.0.116",
