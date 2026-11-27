@@ -2,30 +2,49 @@
   <img src="src/assets/logo.svg" alt="OpenWhispr" width="120" />
 </p>
 
-<h1 align="center">OpenWhispr</h1>
+<h1 align="center">OpenWhisprLocal</h1>
 
 <p align="center">
-  <a href="https://github.com/OpenWhispr/openwhispr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/OpenWhispr/openwhispr?style=flat" alt="License" /></a>
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey?style=flat" alt="Platform" />
-  <a href="https://github.com/OpenWhispr/openwhispr/releases/latest"><img src="https://img.shields.io/github/v/release/OpenWhispr/openwhispr?style=flat&sort=semver" alt="GitHub release" /></a>
-  <a href="https://github.com/OpenWhispr/openwhispr/releases"><img src="https://img.shields.io/github/downloads/OpenWhispr/openwhispr/total?style=flat&color=blue" alt="Downloads" /></a>
-  <a href="https://github.com/OpenWhispr/openwhispr/stargazers"><img src="https://img.shields.io/github/stars/OpenWhispr/openwhispr?style=flat" alt="GitHub stars" /></a>
+  <a href="https://github.com/trytotest13/OpenWhisprLocal/blob/main/LICENSE"><img src="https://img.shields.io/github/license/trytotest13/OpenWhisprLocal?style=flat" alt="License" /></a>
+  <img src="https://img.shields.io/badge/platform-Windows%20Portable-lightgrey?style=flat" alt="Platform" />
+  <a href="https://github.com/trytotest13/OpenWhisprLocal/releases/latest"><img src="https://img.shields.io/github/v/release/trytotest13/OpenWhisprLocal?style=flat&sort=semver" alt="GitHub release" /></a>
 </p>
 
 <p align="center">
-  The open-source and free alternative to WisprFlow and Granola.<br/>
-  Privacy-first voice-to-text dictation with AI agents, meeting transcription, and notes. Cross-platform for macOS, Windows, and Linux.
-</p>
-
-<p align="center">
-  <a href="https://openwhispr.com">Website</a> &middot;
-  <a href="https://docs.openwhispr.com">Docs</a> &middot;
-  <a href="https://github.com/OpenWhispr/openwhispr/releases/latest">Download</a> &middot;
-  <a href="https://docs.openwhispr.com/api/overview">API</a> &middot;
-  <a href="https://github.com/OpenWhispr/openwhispr/blob/main/CHANGELOG.md">Changelog</a>
+  Portable, no-login Windows edition of <a href="https://github.com/OpenWhispr/openwhispr">OpenWhispr</a>.<br/>
+  Download the zip, extract it anywhere, and run <code>OpenWhisprLocal.exe</code>.
 </p>
 
 ---
+
+**OpenWhisprLocal** is a portable build of [OpenWhispr](https://github.com/OpenWhispr/openwhispr) focused on local, offline speech-to-text on Windows:
+
+- **Portable & isolated**: Runs from any folder or drive (`portable-data/` is stored next to `OpenWhisprLocal.exe`), so it does not conflict with an existing `C:\Program Files\OpenWhispr` installation.
+- **No login gate**: Skips the sign-in screen on startup and enters directly as guest.
+- **My Local tab + all-drive model scanner**: Under **Settings → Transcription → Local → My Local**, click **Scan Drives** to discover `Voz` (`desert-ant-labs/voz`), `Whisper` (`ggml-*.bin` / `.gguf`), and `Parakeet` (`sherpa-onnx`) models across all mounted drives on your PC and switch between them.
+- **DirectML GPU Voz engine**: Includes `voz-server-win32-x64.exe` with DirectML GPU acceleration (and automatic CPU fallback) for `desert-ant-labs/voz`.
+- **Optional auto-start**: Double-click `setup-portable-autostart.bat` inside the extracted folder to register `OpenWhisprLocal.exe` in Windows Startup and launch it.
+
+## Quick start (Portable Zip)
+
+1. Download `OpenWhispr-1.12.2-win.zip` from [Releases](https://github.com/trytotest13/OpenWhisprLocal/releases/latest).
+2. Extract the zip to any folder (or USB drive).
+3. Run `OpenWhisprLocal.exe` (or double-click `setup-portable-autostart.bat` to also add it to Windows Startup).
+4. Open **Settings → Transcription → Local → My Local** to pick your local model (use **Whisper** for Hindi and other non-European languages; **Voz** / **Parakeet** for fast English and European languages).
+
+> **Note for Administrator apps:** If you dictate into elevated/Administrator windows (such as an Admin terminal or IDE), right-click `OpenWhisprLocal.exe` and choose **Run as administrator** so Windows allows global hotkeys and auto-paste.
+
+## Building the portable zip from source
+
+```bat
+npm install
+npm run prebuild:win
+npm run build:win:portable
+```
+
+---
+
+## Upstream OpenWhispr Overview
 
 OpenWhispr turns your voice into text, notes, and actions from your desktop. Press a hotkey, speak, and your words appear at your cursor. Choose between fully private offline transcription with local speech-to-text models like Orukeet, Whisper, NVIDIA Parakeet, and Cohere Transcribe — where your audio never leaves your device — or cloud processing for speed. No data collection, no telemetry, fully open source.
 
