@@ -33,6 +33,7 @@ const { openExternalUrl } = require("./externalUrlOpener");
 const { PRIVACY_SETTINGS_URL, usesAppControlPicker } = require("./macAppControl");
 const { resolveFailedGpuBackends } = require("./whisper");
 const { WHISPER_GPU_FAILURE_REASON_KEYS } = require("./whisperGpuFailureReason");
+const { ensureLocalVozServer, scanLocalModels, transcribeLocalVoz } = require("./vozServer");
 const { BYOK_API_KEYS } = require("../config/secretKeys");
 const { dictionaryWordKey } = require("../utils/dictionaryWordKey");
 const tokenStore = require("./tokenStore");
@@ -2568,6 +2569,22 @@ class IPCHandlers {
     handleRemoteProduct("test-provider-connection", (_event, config) =>
       cachedConnectionCheck(config, () => checkProviderConnection(config))
     );
+    ipcMain.handle("voz-ensure-server", (event, modelDir) => {
+      if (!isFromWindow(event, BrowserWindow.fromWebContents(event.sender))) {
+        return { ok: false, error: "Unauthorized IPC sender" };
+      }
+      return ensureLocalVozServer(typeof modelDir === "string" ? modelDir : undefined);
+    });
+    ipcMain.handle("voz-scan-models", (event) => {
+      if (!isFromWindow(event, BrowserWindow.fromWebContents(event.sender))) return [];
+      return scanLocalModels();
+    });
+    ipcMain.handle("voz-transcribe", (event, audioBuffer, options) => {
+      if (!isFromWindow(event, BrowserWindow.fromWebContents(event.sender))) {
+        return { success: false, error: "Unauthorized IPC sender" };
+      }
+      return transcribeLocalVoz(audioBuffer, options?.modelDir);
+    });
 
     ipcMain.handle("window-minimize", () => {
       if (this.windowManager.controlPanelWindow) {

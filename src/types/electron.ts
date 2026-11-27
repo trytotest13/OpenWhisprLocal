@@ -1843,6 +1843,24 @@ declare global {
       stopOnboardingDemo?: (id: string) => Promise<boolean>;
       publishOnboardingDemoEvent?: (event: Omit<OnboardingDemoEvent, "demoId">) => Promise<boolean>;
       onOnboardingDemoEvent?: (callback: (event: OnboardingDemoEvent) => void) => () => void;
+      ensureLocalVozServer?: (modelDir?: string) => Promise<{
+        ok: boolean;
+        url?: string;
+        model?: string;
+        modelDir?: string;
+        error?: string;
+      }>;
+      scanLocalModels?: () => Promise<
+        Array<{
+          kind: "voz" | "whisper" | "parakeet";
+          name: string;
+          path: string;
+        }>
+      >;
+      transcribeLocalVoz?: (
+        audioBuffer: ArrayBuffer,
+        options?: { modelDir?: string }
+      ) => Promise<{ success: boolean; text?: string; error?: string }>;
       testProviderConnection?: (config: {
         scope: "transcription" | "reasoning";
         provider: string;

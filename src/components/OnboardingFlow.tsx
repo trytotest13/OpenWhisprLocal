@@ -135,12 +135,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     clearSession,
   } = useOnboardingSession();
 
-  useEffect(() => {
-    if (!localOnly || session.currentStepId !== "auth") return;
-    setAuthPath("guest");
-    goTo("permissions");
-  }, [localOnly, session.currentStepId, setAuthPath, goTo]);
-
   const handleLogout = useCallback(async () => {
     await signOut();
     resetOnboardingProgress(localStorage);
@@ -149,6 +143,12 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   // Set by Back on the permissions step: a signed-in user who asked to return to
   // the auth step gets the welcome screen (where Log out lives), not auto-advance.
   const [returnedToAuth, setReturnedToAuth] = useState(false);
+
+  useEffect(() => {
+    if (session.currentStepId !== "auth" || returnedToAuth) return;
+    setAuthPath("guest");
+    goTo("permissions");
+  }, [returnedToAuth, session.currentStepId, setAuthPath, goTo]);
 
   const { dictationHotkeyConfirmed, assistantHotkeyConfirmed } = session.resume;
   const [dictationHotkey, setDictationHotkey] = useState(() =>
@@ -970,13 +970,13 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 requireSignIn
                   ? undefined
                   : () => {
-                      // Guests continue onto their route's permissions step — jumping
-                      // straight to setup-choice would skip the permission grants and
-                      // hotkey the guest route exists to guarantee (see flow.ts).
-                      setReturnedToAuth(false);
-                      setAuthPath("guest");
-                      goTo("permissions");
-                    }
+                    // Guests continue onto their route's permissions step — jumping
+                    // straight to setup-choice would skip the permission grants and
+                    // hotkey the guest route exists to guarantee (see flow.ts).
+                    setReturnedToAuth(false);
+                    setAuthPath("guest");
+                    goTo("permissions");
+                  }
               }
               onAuthComplete={() => {
                 setReturnedToAuth(false);
@@ -1018,19 +1018,19 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             screenContext={
               agentAllowed && screenContextAllowed
                 ? {
-                    enabled: settingsStore.voiceAgentScreenContext,
-                    granted: screenRecordingGranted,
-                    needsRelaunch: screenRecordingNeedsRelaunch,
-                    request: enableScreenContext,
-                  }
+                  enabled: settingsStore.voiceAgentScreenContext,
+                  granted: screenRecordingGranted,
+                  needsRelaunch: screenRecordingNeedsRelaunch,
+                  request: enableScreenContext,
+                }
                 : undefined
             }
             onBack={
               session.history.length > 0
                 ? () => {
-                    setReturnedToAuth(true);
-                    goBack();
-                  }
+                  setReturnedToAuth(true);
+                  goBack();
+                }
                 : undefined
             }
             onContinue={() => void continueFromCurrentStep()}
@@ -1086,9 +1086,9 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 assistant
                   ? undefined
                   : [
-                      t("onboarding.rehaul.dictationHotkey.titleLineOne"),
-                      t("onboarding.rehaul.dictationHotkey.titleLineTwo"),
-                    ]
+                    t("onboarding.rehaul.dictationHotkey.titleLineOne"),
+                    t("onboarding.rehaul.dictationHotkey.titleLineTwo"),
+                  ]
               }
               wideTitle={assistant}
               wideDescription={assistant}
@@ -1202,9 +1202,9 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 assistant
                   ? undefined
                   : [
-                      t("onboarding.rehaul.dictationDemo.titleLineOne"),
-                      t("onboarding.rehaul.dictationDemo.titleLineTwo"),
-                    ]
+                    t("onboarding.rehaul.dictationDemo.titleLineOne"),
+                    t("onboarding.rehaul.dictationDemo.titleLineTwo"),
+                  ]
               }
               wideTitle={assistant}
               description={<DemoHotkeyDescription text={description} hotkey={hotkeyInstruction} />}

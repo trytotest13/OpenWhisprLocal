@@ -1186,6 +1186,67 @@ export default function TranscriptionModelPicker({
     [providerAllowed]
   );
 
+  const [scannedModels, setScannedModels] = useState<
+    Array<{ kind: "voz" | "whisper" | "parakeet"; name: string; path: string }>
+  >([]);
+  const [scanningDrives, setScanningDrives] = useState(false);
+  const [vozLoadingPath, setVozLoadingPath] = useState<string | null>(null);
+  const [myLocalError, setMyLocalError] = useState<string | null>(null);
+  const [selectedVozPath, setSelectedVozPath] = useState(() =>
+    typeof localStorage !== "undefined" ? localStorage.getItem("vozModelPath") || "" : ""
+  );
+
+  const runDriveScan = useCallback(async () => {
+    setMyLocalError(null);
+    setScanningDrives(true);
+    try {
+      const found = (await window.electronAPI?.scanLocalModels?.()) ?? [];
+      setScannedModels(found);
+    } catch (err) {
+      setMyLocalError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setScanningDrives(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (internalLocalProvider === "my-local" && scannedModels.length === 0 && !scanningDrives) {
+      void runDriveScan();
+    }
+  }, [internalLocalProvider, scannedModels.length, scanningDrives, runDriveScan]);
+
+  const handleSelectScannedModel = useCallback(
+    async (item: { kind: "voz" | "whisper" | "parakeet"; name: string; path: string }) => {
+      setMyLocalError(null);
+      if (item.kind === "voz") {
+        setVozLoadingPath(item.path);
+        try {
+          const res = await window.electronAPI?.ensureLocalVozServer?.(item.path);
+          if (!res?.ok) {
+            setMyLocalError(res?.error || "Failed to start local Voz model");
+            return;
+          }
+          localStorage.setItem("vozModelPath", item.path);
+          setSelectedVozPath(item.path);
+          onLocalProviderSelect?.("nvidia");
+          onLocalModelSelect("voz-local", "nvidia");
+        } finally {
+          setVozLoadingPath(null);
+        }
+      } else if (item.kind === "parakeet") {
+        const folder = item.path.split(/[\\/]/).pop() || "";
+        onLocalProviderSelect?.("nvidia");
+        onLocalModelSelect(folder, "nvidia");
+      } else if (item.kind === "whisper") {
+        const file = item.path.split(/[\\/]/).pop() || "";
+        const id = file.replace(/^ggml-/i, "").replace(/\.bin$/i, "");
+        onLocalProviderSelect?.("whisper");
+        onLocalModelSelect(id, "whisper");
+      }
+    },
+    [onLocalModelSelect, onLocalProviderSelect]
+  );
+
   const handleLocalProviderChange = useCallback(
     (providerId: string) => {
       const tab = localProviderTabs.find((candidate) => candidate.id === providerId);
@@ -2004,6 +2065,89 @@ export default function TranscriptionModelPicker({
           <div>
             {internalLocalProvider === "whisper" && renderLocalModels()}
             {usesParakeetManager(internalLocalProvider) && renderParakeetModels()}
+            {internalLocalProvider === "my-local" && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-surface-1 px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-foreground">
+                      Models Found on Your PC ({scannedModels.length})
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Scans all drives for Voz, Whisper, and Parakeet models.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={scanningDrives}
+                    onClick={() => void runDriveScan()}
+                  >
+                    {scanningDrives ? "Scanning..." : "Scan Drives"}
+                  </Button>
+                </div>
+                {myLocalError && <p className="text-xs text-destructive">{myLocalError}</p>}
+                {scannedModels.length === 0 && !scanningDrives ? (
+                  <p className="text-xs text-muted-foreground px-1 py-2">
+                    No local models found yet. Click Scan Drives to search again.
+                  </p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {scannedModels.map((item) => {
+                      const isActive =
+                        item.kind === "voz"
+                          ? selectedLocalModel === "voz-local" && selectedVozPath === item.path
+                          : item.kind === "parakeet"
+                            ? selectedLocalModel === (item.path.split(/[\\/]/).pop() || "")
+                            : selectedLocalModel ===
+                              (item.path.split(/[\\/]/).pop() || "")
+                                .replace(/^ggml-/i, "")
+                                .replace(/\.bin$/i, "");
+                      return (
+                        <div
+                          key={`${item.kind}:${item.path}`}
+                          onClick={() => void handleSelectScannedModel(item)}
+                          className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
+                            isActive
+                              ? "border-primary bg-primary/10"
+                              : "border-border bg-surface-1 hover:bg-surface-2"
+                          }`}
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium text-foreground truncate">
+                                {item.name}
+                              </span>
+                              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
+                                {item.kind}
+                              </span>
+                              {isActive && (
+                                <span className="text-[10px] font-medium text-primary">
+                                  Active
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-muted-foreground truncate">{item.path}</p>
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={isActive ? "secondary" : "default"}
+                            disabled={vozLoadingPath === item.path}
+                          >
+                            {vozLoadingPath === item.path
+                              ? "Loading..."
+                              : isActive
+                                ? "Selected"
+                                : "Use"}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}

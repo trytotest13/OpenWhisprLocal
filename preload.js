@@ -124,6 +124,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     (callback) => (_event, payload) => callback(payload)
   ),
   testProviderConnection: (config) => ipcRenderer.invoke("test-provider-connection", config),
+  ensureLocalVozServer: (modelDir) => ipcRenderer.invoke("voz-ensure-server", modelDir),
+  scanLocalModels: () => ipcRenderer.invoke("voz-scan-models"),
+  transcribeLocalVoz: (audioBuffer, options) => ipcRenderer.invoke("voz-transcribe", audioBuffer, options),
   pasteText: (text, options) => ipcRenderer.invoke("paste-text", text, options),
   captureSelectedText: (options) => ipcRenderer.invoke("capture-selected-text", options),
   cancelSelectionEdit: (sessionId) => ipcRenderer.invoke("cancel-selection-edit", sessionId),

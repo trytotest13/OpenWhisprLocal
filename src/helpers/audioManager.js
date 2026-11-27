@@ -2824,10 +2824,15 @@ registerProcessor("pcm-streaming-processor", PCMStreamingProcessor);
         );
 
         const transcriptionStart = performance.now();
-        result = await window.electronAPI.transcribeLocalParakeet(arrayBuffer, {
-          model,
-          language: getBaseLanguageCode(this.getEffectiveSttLanguage(getSettings())),
-        });
+        result =
+          model === "voz-local"
+            ? await window.electronAPI.transcribeLocalVoz(arrayBuffer, {
+                modelDir: localStorage.getItem("vozModelPath") || undefined,
+              })
+            : await window.electronAPI.transcribeLocalParakeet(arrayBuffer, {
+                model,
+                language: getBaseLanguageCode(this.getEffectiveSttLanguage(getSettings())),
+              });
         if (isTranscriptionPolicyRefusal(result)) throw errorFromIpcResult(result);
         timings.transcriptionProcessingDurationMs = Math.round(
           performance.now() - transcriptionStart

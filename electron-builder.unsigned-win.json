@@ -4,6 +4,7 @@
     "windowsTrayIdentity": false
   },
   "win": {
+    "executableName": "OpenWhisprLocal",
     "azureSignOptions": null,
     "forceCodeSigning": false
   }

@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import { useEffect, type JSX } from "react";
 import { useTranslation } from "react-i18next";
 import { CompactAuthenticationFlow } from "./CompactAuthenticationFlow";
 import OnboardingShell from "./onboarding/OnboardingShell";
@@ -15,6 +15,13 @@ export default function ReauthenticationScreen({
   requiredByDevice = false,
 }: ReauthenticationScreenProps): JSX.Element {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!requiredByDevice && onContinueWithoutAccount) {
+      onContinueWithoutAccount();
+    }
+  }, [requiredByDevice, onContinueWithoutAccount]);
+
   return (
     <OnboardingShell compact stepKey="reauthentication">
       <div className="min-h-full w-full">

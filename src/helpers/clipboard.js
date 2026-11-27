@@ -24,8 +24,8 @@ function pasteCancelledError() {
 
 const PASTE_DELAYS = {
   darwin: 120,
-  win32_fast: 10,
-  win32_pwsh: 40,
+  win32_fast: 80,
+  win32_pwsh: 100,
   linux: 50,
 };
 
@@ -53,7 +53,7 @@ const RESTORE_DELAYS = {
   // transient marker) can't trigger a restore before the target pastes.
   darwin_after_read: 50,
   darwin: 450,
-  win32_pwsh: 500,
+  win32_pwsh: 700,
   linux: 800,
   linux_kde_wayland: 1200,
 };

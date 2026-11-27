@@ -7,6 +7,7 @@ export const LOCAL_ASR_ORGANIZATIONS = [
   { id: "whisper", name: "OpenAI" },
   { id: "nvidia", name: "NVIDIA" },
   { id: "cohere", name: "Cohere" },
+  { id: "my-local", name: "My Local" },
 ];
 
 export function getASRModelOrganization(modelId: string): string {

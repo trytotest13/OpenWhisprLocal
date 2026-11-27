@@ -83,6 +83,15 @@ const APP_CHANNEL = resolveAppChannel();
 process.env.OPENWHISPR_CHANNEL = APP_CHANNEL;
 
 function configureChannelUserDataPath() {
+  if (app.isPackaged) {
+    const exeDir = path.dirname(process.execPath);
+    const progFiles = (process.env.ProgramFiles || "C:\\Program Files").toLowerCase();
+    if (!exeDir.toLowerCase().startsWith(progFiles) || fs.existsSync(path.join(exeDir, "portable-data"))) {
+      app.setPath("userData", path.join(exeDir, "portable-data"));
+      return;
+    }
+  }
+
   if (APP_CHANNEL === "production") {
     return;
   }
